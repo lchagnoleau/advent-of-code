@@ -77,6 +77,31 @@ fn part1(games: &Vec<Game>) -> u32 {
     sum_of_possible_id
 }
 
+#[aoc(day2, part2)]
+fn part2(games: &Vec<Game>) -> u32 {
+    let mut sum_power_set: u32 = 0;
+
+    for game in games {
+        let mut m_r: u32 = 0;
+        let mut m_g: u32 = 0;
+        let mut m_b: u32 = 0;
+        for draw in &game.draws {
+            if draw.red > m_r {
+                m_r = draw.red;
+            }
+            if draw.green > m_g {
+                m_g = draw.green;
+            }
+            if draw.blue > m_b {
+                m_b = draw.blue;
+            }
+        }
+        sum_power_set += m_r * m_g * m_b;
+    }
+
+    sum_power_set
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -177,5 +202,11 @@ mod tests {
     fn part1_input() {
         let data = include_str!("../input/2023/day2.txt");
         assert_eq!(part1(&input_generator(data)), 1867);
+    }
+
+    #[test]
+    fn part2_input() {
+        let data = include_str!("../input/2023/day2.txt");
+        assert_eq!(part2(&input_generator(data)), 84538);
     }
 }
