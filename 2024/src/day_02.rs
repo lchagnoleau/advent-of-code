@@ -11,6 +11,22 @@ fn part1(input: &str) -> u32 {
     result
 }
 
+#[aoc(day2, part2)]
+fn part2(input: &str) -> u32 {
+    let mut result: u32 = 0;
+
+    for line in input.lines() {
+        for l in get_all_possible(&split_line(line)) {
+            if list_increase(&l) || list_decrease(&l) {
+                result += 1;
+                break;
+            }
+        }
+    }
+
+    result
+}
+
 fn split_line(line: &str) -> Vec<u32> {
     let mut result = Vec::new();
 
@@ -47,6 +63,18 @@ fn list_decrease(list: &Vec<u32>) -> bool {
     true
 }
 
+fn get_all_possible(list: &Vec<u32>) -> Vec<Vec<u32>> {
+    let mut ret = Vec::new();
+
+    for i in 0..list.len() {
+        let mut list_clone = list.clone();
+        list_clone.remove(i);
+        ret.push(list_clone);
+    }
+
+    ret
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -55,6 +83,12 @@ mod tests {
     fn part1_input() {
         let data = include_str!("../input/day2.txt");
         assert_eq!(part1(data), 598);
+    }
+
+    #[test]
+    fn part2_input() {
+        let data = include_str!("../input/day2.txt");
+        assert_eq!(part2(data), 634);
     }
 
     #[test]
@@ -95,5 +129,12 @@ mod tests {
 
         let list = vec![9, 4, 3, 2, 1];
         assert_eq!(list_decrease(&list), false);
+    }
+
+    #[test]
+    fn test_get_all_possible() {
+        let lists = get_all_possible(&vec![1, 2, 3]);
+
+        assert_eq!(lists, vec![vec![2, 3], vec![1, 3], vec![1, 2]]);
     }
 }
