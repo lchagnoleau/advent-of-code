@@ -100,6 +100,33 @@ fn part1(input: &str) -> u32 {
     result
 }
 
+#[aoc(day4, part2)]
+fn part2(input: &str) -> u32 {
+    let mut result: u32 = 0;
+
+    let matrix = Matrix::new(input);
+
+    // We assume that width and height are equal
+    let size = matrix.height;
+
+    for x in 1..size - 1 {
+        for y in 1..size - 1 {
+            if matrix[Coor::new((x, y))] == b'A'{
+                let ul = matrix[Coor::new((x - 1, y - 1))];
+                let ur = matrix[Coor::new((x + 1, y - 1))];
+                let dl = matrix[Coor::new((x - 1, y + 1))];
+                let dr = matrix[Coor::new((x + 1, y + 1))];
+
+                if ((ul == b'M' && dr == b'S') || (ul == b'S' && dr == b'M')) && ((ur == b'M' && dl == b'S') || (ur == b'S' && dl == b'M')) {
+                    result += 1;
+                }
+            }
+        }
+    }
+
+    result
+}
+
 fn search(matrix: &Matrix, mut coor: Coor, dir: Coor, size: i32) -> u32 {
     let mut result = 0;
     let mut word: u32 = 0;
@@ -124,6 +151,11 @@ mod tests {
     fn part1_input() {
         let data = include_str!("../input/day4.txt");
         assert_eq!(part1(data), 2462);
+    }
+    #[test]
+    fn part2_input() {
+        let data = include_str!("../input/day4.txt");
+        assert_eq!(part2(data), 1877);
     }
 
     #[test]
