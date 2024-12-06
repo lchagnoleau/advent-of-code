@@ -50,6 +50,22 @@ impl Index<usize> for Rules {
     }
 }
 
+fn sort(pages: &Vec<u32>, rules: &Rules) -> Vec<u32> {
+    let mut sorted_pages = pages.clone();
+    sorted_pages.sort_by(|a, b| {
+        let a_before = rules.before(*a);
+        let b_before = rules.before(*b);
+        if a_before.contains(b) {
+            std::cmp::Ordering::Greater
+        } else if b_before.contains(a) {
+            std::cmp::Ordering::Less
+        } else {
+            std::cmp::Ordering::Equal
+        }
+    });
+    sorted_pages
+}
+
 fn get_middle_of_list(pages: &Vec<u32>) -> u32 {
     pages[pages.len() / 2]
 }
@@ -109,6 +125,32 @@ fn part1(input: &str) -> u32 {
     correct_pages.iter().map(|x| get_middle_of_list(x)).sum()
 }
 
+
+#[aoc(day5, part2)]
+fn part2(input: &str) -> u32 {
+    let mut bad_pages: Vec<Vec<u32>> = Vec::new();
+
+    let inputs: Vec<&str> = input.split("\n\n").collect();
+    let rules = Rules::parse(inputs[0]);
+
+    let pages_line = inputs[1]
+    .lines()
+    .map(|x| {
+        x.split(',')
+            .map(|x| x.parse::<u32>().unwrap())
+            .collect::<Vec<u32>>()
+    })
+    .collect::<Vec<Vec<u32>>>();
+
+    for line in pages_line {
+        if check_line(&line, &rules) == false {
+            bad_pages.push(line);
+        }
+    }
+
+    bad_pages.iter().map(|x| get_middle_of_list(&sort(x, &rules))).sum()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -117,6 +159,12 @@ mod tests {
     fn part1_input() {
         let data = include_str!("../input/day5.txt");
         assert_eq!(part1(data), 5651);
+    }
+
+    #[test]
+    fn part2_input() {
+        let data = include_str!("../input/day5.txt");
+        assert_eq!(part2(data), 0);
     }
 
     #[test]
