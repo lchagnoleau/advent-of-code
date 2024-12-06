@@ -38,9 +38,17 @@ impl Sub for Coor {
     }
 }
 
+#[derive(PartialEq, Debug)]
+enum Status {
+    Running,
+    Stuck,
+    Out,
+}
+
 struct Map {
     width: i32,
     height: i32,
+    log_pos: Vec<(char, Coor)>,
     value: Vec<char>,
 }
 
@@ -50,11 +58,13 @@ impl Map {
 
         let width = lines[0].len() as i32;
         let height = lines.len() as i32;
+        let log_pos = vec![];
         let value = lines.iter().flat_map(|l| l.chars()).collect();
 
         Map {
             width,
             height,
+            log_pos,
             value,
         }
     }
@@ -84,14 +94,22 @@ impl Map {
             _ => Coor::new(0, 0),
         }
     }
-    fn run(&mut self) -> bool {
+    fn run(&mut self) -> Status {
         let pos = self.get_pos();
         let next_pos = pos + self.next_dir(pos);
 
+        // Seems we are stuck
+        for log in &self.log_pos {
+            if self[pos] == log.0 && pos == log.1 {
+                return Status::Stuck;
+            }
+        }
+
         // We are out of map, so return false
-        if next_pos.x >= self.width || next_pos.y >= self.height || next_pos.x < 0 || next_pos.y < 0 {
+        if next_pos.x >= self.width || next_pos.y >= self.height || next_pos.x < 0 || next_pos.y < 0
+        {
             self[pos] = 'X';
-            return false;
+            return Status::Out;
         }
 
         match self[next_pos] {
@@ -99,20 +117,33 @@ impl Map {
                 self[next_pos] = self[pos]; //Continue moving in the same direction
                 self[pos] = 'X'; //To mark we are visited this area
             }
-            '#' => match self[pos] {
-                '^' => self[pos] = '>',
-                '>' => self[pos] = 'V',
-                '<' => self[pos] = '^',
-                'V' => self[pos] = '<',
-                _ => return false,
-            },
-            _ => return false,
+            '#' => {
+                self.log_pos.push((self[pos], pos));
+                match self[pos] {
+                    '^' => self[pos] = '>',
+                    '>' => self[pos] = 'V',
+                    '<' => self[pos] = '^',
+                    'V' => self[pos] = '<',
+                    _ => return Status::Out,
+                }
+            }
+            _ => return Status::Out,
         }
 
-        true
+        Status::Running
     }
-    fn get_visited_area(&self) -> u32 {
-        self.value.iter().filter(|x| **x == 'X').count() as u32
+    fn get_visited_area(&self) -> Vec<Coor> {
+        let mut r = Vec::new();
+
+        for x in 0..self.width {
+            for y in 0..self.height {
+                if self[Coor::new(x, y)] == 'X' {
+                    r.push(Coor::new(x, y));
+                }
+            }
+        }
+
+        r
     }
     fn print_map(&self) {
         for y in 0..self.height {
@@ -144,8 +175,30 @@ impl IndexMut<Coor> for Map {
 #[aoc(day6, part1)]
 fn part1(input: &str) -> u32 {
     let mut map = Map::new(input);
-    while map.run() {}
-    map.get_visited_area()
+    while map.run() == Status::Running {}
+    map.get_visited_area().len() as u32
+}
+
+#[aoc(day6, part2)]
+fn part2(input: &str) -> u32 {
+    let mut map = Map::new(input);
+    while map.run() == Status::Running {}
+    let mut result = 0;
+
+    // try all possible obstacle position
+    for pos in map.get_visited_area() {
+        let mut new_map = Map::new(input);
+        if new_map[pos] == '.' {
+            new_map[pos] = '#';
+        }
+
+        let mut status = Status::Running;
+        while status == Status::Running {
+            status = new_map.run();
+        }
+        result += (status == Status::Stuck) as u32;
+    }
+    result
 }
 
 #[cfg(test)]
@@ -156,6 +209,12 @@ mod tests {
     fn part1_input() {
         let data = include_str!("../input/day6.txt");
         assert_eq!(part1(data), 5080);
+    }
+
+    #[test]
+    fn part2_input() {
+        let data = include_str!("../input/day6.txt");
+        assert_eq!(part2(data), 1919);
     }
 
     #[test]
@@ -174,10 +233,93 @@ mod tests {
         let mut map = Map::new(data);
         assert_eq!(map.get_pos(), Coor::new(4, 6));
         assert_eq!(map.next_dir(map.get_pos()), Coor::new(0, -1));
-        while map.run() {
+        while map.run() == Status::Running {
             map.print_map();
             println!();
         }
-        assert_eq!(map.get_visited_area(), 41);
+        assert_eq!(map.get_visited_area().len() as u32, 41);
+    }
+
+    #[test]
+    fn test_stuck() {
+        let data = "....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#.#^.....
+........#.
+#.........
+......#...";
+
+        let mut map = Map::new(data);
+        assert_eq!(map.get_pos(), Coor::new(4, 6));
+        assert_eq!(map.next_dir(map.get_pos()), Coor::new(0, -1));
+        let mut status = Status::Running;
+        while status == Status::Running {
+            status = map.run();
+            map.print_map();
+        }
+        assert_eq!(status, Status::Stuck);
+    }
+
+    #[test]
+    fn test_stuck_2() {
+        let data = "....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+......#.#.
+#.........
+......#...";
+
+        let mut map = Map::new(data);
+        assert_eq!(map.get_pos(), Coor::new(4, 6));
+        assert_eq!(map.next_dir(map.get_pos()), Coor::new(0, -1));
+        let mut status = Status::Running;
+        while status == Status::Running {
+            status = map.run();
+            map.print_map();
+        }
+        assert_eq!(status, Status::Stuck);
+    }
+
+    #[test]
+    fn test_part2() {
+        let data = "....#.....
+.........#
+..........
+..#.......
+.......#..
+..........
+.#..^.....
+........#.
+#.........
+......#...";
+
+        let mut map = Map::new(data);
+        while map.run() == Status::Running {}
+
+        let mut result = 0;
+
+        // try all possible obstacle position
+        for pos in map.get_visited_area() {
+            let mut new_map = Map::new(data);
+            if new_map[pos] == '.' {
+                new_map[pos] = '#';
+            }
+
+
+            let mut status = Status::Running;
+            while status == Status::Running {
+                status = new_map.run();
+            }
+            result += (status == Status::Stuck) as u32;
+        }
+        assert_eq!(result, 6);
     }
 }
