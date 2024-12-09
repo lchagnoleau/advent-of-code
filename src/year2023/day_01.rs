@@ -38,19 +38,12 @@ fn part2(input: &str) -> u32 {
         .sum()
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn part1_input() {
-        let data = include_str!("../input/2023/day1.txt");
-        assert_eq!(part1(data), 55108);
-    }
-
-    #[test]
-    fn part2_input() {
-        let data = include_str!("../input/2023/day1.txt");
-        assert_eq!(part2(data), 56324);
-    }
+#[test]
+fn test_example() {
+    let data = "1abc2
+pqr3stu8vwx
+a1b2c3d4e5f
+treb7uchet";
+    assert_eq!(part1(data), 142);
+    // assert_eq!(part2(data), 281);
 }

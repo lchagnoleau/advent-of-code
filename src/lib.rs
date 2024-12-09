@@ -7,6 +7,11 @@ pub mod utils {
     pub mod grid;
 }
 
+// pub mod year2023 {
+//     pub mod day_01;
+//     pub mod day_02;
+// }
+
 pub mod year2024 {
     pub mod day_01;
     pub mod day_02;
@@ -18,4 +23,5 @@ pub mod year2024 {
     pub mod day_08;
 }
 
+// aoc_lib! { year = 2023 }
 aoc_lib! { year = 2024 }

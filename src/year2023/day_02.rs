@@ -44,7 +44,7 @@ fn parse_line(line: &str) -> Game {
         .split(": ")
         .nth(1)
         .map(|draws_str| draws_str.split("; ").map(parse_draw).collect())
-        .unwrap_or(Vec::new());
+        .unwrap_or_default();
 
     Game { id, draws }
 }
@@ -102,111 +102,99 @@ fn part2(games: &Vec<Game>) -> u32 {
     sum_power_set
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[test]
+fn test_example() {
+    let data = "Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
+Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
+Game 3: 8 green, 6 blue, 20 red; 5 blue, 4 red, 13 green; 5 green, 1 red
+Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
+Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green";
+    assert_eq!(part1(&input_generator(data)), 8);
+    assert_eq!(part2(&input_generator(data)), 2286);
+}
 
-    // #[test]
-    // fn part1_input() {
-    //     let data = include_str!("../input/2023/day2.txt");
-    //     assert_eq!(part1(data), 55108);
-    // }
+#[test]
+fn test_parse_id() {
+    assert_eq!(parse_id("Game 12"), 12);
+    assert_eq!(parse_id("Game 1"), 1);
+    assert_eq!(parse_id("Game 100"), 100);
+}
 
-    #[test]
-    fn test_parse_id() {
-        assert_eq!(parse_id("Game 12"), 12);
-        assert_eq!(parse_id("Game 1"), 1);
-        assert_eq!(parse_id("Game 100"), 100);
-    }
+#[test]
+fn test_parse_draw() {
+    assert_eq!(
+        parse_draw("5 red, 1 green"),
+        Draw {
+            red: 5,
+            green: 1,
+            blue: 0
+        }
+    );
+    assert_eq!(
+        parse_draw("8 red, 12 blue"),
+        Draw {
+            red: 8,
+            green: 0,
+            blue: 12
+        }
+    );
+}
 
-    #[test]
-    fn test_parse_draw() {
-        assert_eq!(
-            parse_draw("5 red, 1 green"),
-            Draw {
-                red: 5,
-                green: 1,
-                blue: 0
-            }
-        );
-        assert_eq!(
-            parse_draw("8 red, 12 blue"),
-            Draw {
-                red: 8,
-                green: 0,
-                blue: 12
-            }
-        );
-    }
+#[test]
+fn test_parse_line() {
+    let line = "Game 1: 5 red, 1 green; 6 red, 3 blue; 9 red; 1 blue, 1 green, 4 red; 1 green, 2 blue; 2 blue, 1 red";
+    let game = parse_line(line);
 
-    #[test]
-    fn test_parse_line() {
-        let line = "Game 1: 5 red, 1 green; 6 red, 3 blue; 9 red; 1 blue, 1 green, 4 red; 1 green, 2 blue; 2 blue, 1 red";
-        let game = parse_line(line);
+    assert_eq!(game.id, 1);
 
-        assert_eq!(game.id, 1);
+    assert_eq!(game.draws.len(), 6);
 
-        assert_eq!(game.draws.len(), 6);
-
-        assert_eq!(
-            game.draws[0],
-            Draw {
-                red: 5,
-                green: 1,
-                blue: 0
-            }
-        );
-        assert_eq!(
-            game.draws[1],
-            Draw {
-                red: 6,
-                green: 0,
-                blue: 3
-            }
-        );
-        assert_eq!(
-            game.draws[2],
-            Draw {
-                red: 9,
-                green: 0,
-                blue: 0
-            }
-        );
-        assert_eq!(
-            game.draws[3],
-            Draw {
-                red: 4,
-                green: 1,
-                blue: 1
-            }
-        );
-        assert_eq!(
-            game.draws[4],
-            Draw {
-                red: 0,
-                green: 1,
-                blue: 2
-            }
-        );
-        assert_eq!(
-            game.draws[5],
-            Draw {
-                red: 1,
-                green: 0,
-                blue: 2
-            }
-        );
-    }
-
-    #[test]
-    fn part1_input() {
-        let data = include_str!("../input/2023/day2.txt");
-        assert_eq!(part1(&input_generator(data)), 1867);
-    }
-
-    #[test]
-    fn part2_input() {
-        let data = include_str!("../input/2023/day2.txt");
-        assert_eq!(part2(&input_generator(data)), 84538);
-    }
+    assert_eq!(
+        game.draws[0],
+        Draw {
+            red: 5,
+            green: 1,
+            blue: 0
+        }
+    );
+    assert_eq!(
+        game.draws[1],
+        Draw {
+            red: 6,
+            green: 0,
+            blue: 3
+        }
+    );
+    assert_eq!(
+        game.draws[2],
+        Draw {
+            red: 9,
+            green: 0,
+            blue: 0
+        }
+    );
+    assert_eq!(
+        game.draws[3],
+        Draw {
+            red: 4,
+            green: 1,
+            blue: 1
+        }
+    );
+    assert_eq!(
+        game.draws[4],
+        Draw {
+            red: 0,
+            green: 1,
+            blue: 2
+        }
+    );
+    assert_eq!(
+        game.draws[5],
+        Draw {
+            red: 1,
+            green: 0,
+            blue: 2
+        }
+    );
 }
