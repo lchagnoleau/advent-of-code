@@ -1,62 +1,85 @@
 use std::fmt::Arguments;
+use std::collections::HashMap;
 
 use crate::utils::grid::*;
 
-fn create_all_single_antenna_map(global_map: &Grid) -> Vec<Grid> {
-    let mut kind_of_antennas: Vec<u8> = Vec::new();
-    let mut all_map = Vec::new();
+struct Node {
+    grid: Grid,
+    antennas: HashMap<u8, Vec<Coor>>,
 
-    for c in global_map.value.clone() {
-        if c != b'.' {
-            if !kind_of_antennas.contains(&c) {
-                kind_of_antennas.push(c);
-                let mut new_map = global_map.clone();
-                for i in 0..new_map.value.len() {
-                    if new_map.value[i] != b'.' && new_map.value[i] != c {
-                        new_map.value[i] = b'.';
-                    }
-                }
-                all_map.push(new_map);
+}
+
+fn parse(input: &str) -> Node {
+    let grid = Grid::new(input);
+    let mut antennas = HashMap::new();
+
+    for x in 0..grid.width {
+        for y in 0..grid.height {
+            let coor = Coor::new(x, y);
+            let freq = grid[coor];
+
+            if freq != b'.' {
+                antennas.entry(freq).or_insert_with(Vec::new).push(coor);
             }
         }
     }
 
-    all_map
-}
-
-fn get_antennas_coor(map: &Grid) -> Vec<Coor> {
-    let mut r = Vec::new();
-    for i in 0..map.value.len() {
-        if map.value[i] != b'.' {
-            r.push(Coor::new(i as i32 / map.width - 1 as i32, i as i32 % map.width as i32));
-        }
-    }
-    r
+    Node { grid, antennas }
 }
 
 #[aoc(day8, part1)]
 fn part1(input: &str) -> u32 {
-    let mut antinode: Vec<Coor> = Vec::new();
+    let node = parse(input);
+    let mut antinode = node.grid.copy_with(0);
 
-    for map in create_all_single_antenna_map(&Grid::new(input)) {
-        let antennas = get_antennas_coor(&map);
-        for i in 0..antennas.len() {
-            let mut rest_of_antennas = antennas.clone();
-            rest_of_antennas.remove(i);
-            for ant in rest_of_antennas {
-                let antinode_1 = ant + (ant - antennas[i]);
-                let antinode_2 = antennas[i] - (ant - antennas[i]);
-                if map.in_grid(antinode_1) && !antinode.contains(&antinode_1) {
-                    antinode.push(antinode_1);
-                }
-                if map.in_grid(antinode_2) && !antinode.contains(&antinode_2) {
-                    antinode.push(antinode_2);
+    for freq in node.antennas.values() {
+        for &first in freq {
+            for &second in freq {
+                if first != second {
+                    let distance = second - first;
+                    let ant = second + distance;
+                    if node.grid.in_grid(ant) {
+                        antinode[ant] = 1;
+                    }
                 }
             }
         }
     }
 
-    antinode.len() as u32
+    let mut r = 0;
+    for ant in antinode.value {
+        r += ant as u32;
+    }
+
+    r
+}
+
+#[aoc(day8, part2)]
+fn part2(input: &str) -> u32 {
+    let node = parse(input);
+    let mut antinode = node.grid.copy_with(0);
+
+    for freq in node.antennas.values() {
+        for &first in freq {
+            for &second in freq {
+                if first != second {
+                    let distance = second - first;
+                    let mut ant = second;
+                    while node.grid.in_grid(ant) {
+                        antinode[ant] = 1;
+                        ant += distance;
+                    }
+                }
+            }
+        }
+    }
+
+    let mut r = 0;
+    for ant in antinode.value {
+        r += ant as u32;
+    }
+
+    r
 }
 
 #[cfg(test)]
@@ -67,6 +90,12 @@ mod tests {
     fn part1_input() {
         let data = include_str!("../input/day8.txt");
         assert_eq!(part1(data), 259);
+    }
+
+    #[test]
+    fn part2_input() {
+        let data = include_str!("../input/day8.txt");
+        assert_eq!(part2(data), 927);
     }
     #[test]
     fn test_example() {
@@ -83,70 +112,5 @@ mod tests {
 ............
 ............";
         assert_eq!(part1(test), 14)
-    }
-
-    #[test]
-    fn test_generate_all_map() {
-        let test = "............
-........0...
-.....0......
-.......0....
-....0.......
-......A.....
-............
-............
-........A...
-.........A..
-............
-............";
-
-        let map_1 = "............
-........0...
-.....0......
-.......0....
-....0.......
-............
-............
-............
-............
-............
-............
-............";
-
-        let map_2 = "............
-............
-............
-............
-............
-......A.....
-............
-............
-........A...
-.........A..
-............
-............";
-
-        let expect: Vec<Grid> = vec![Grid::new(map_1), Grid::new(map_2)];
-        assert_eq!(create_all_single_antenna_map(&Grid::new(test)), expect);
-    }
-
-    #[test]
-    fn test_get_antennas_coor() {
-        let map = "............
-........0...
-.....0......
-.......0....
-....0.......
-0...........
-............
-............
-............
-............
-............
-............";
-        let expect = vec![Coor::new(0, 8), Coor::new(1, 5), Coor::new(2, 7), Coor::new(3, 4), Coor::new(4, 0)];
-
-        assert_eq!(get_antennas_coor(&Grid::new(map)), expect);
-
     }
 }

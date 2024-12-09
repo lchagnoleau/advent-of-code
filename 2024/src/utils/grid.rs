@@ -1,5 +1,5 @@
-use std::ops::{AddAssign, Index};
 use std::ops::{Add, Sub};
+use std::ops::{AddAssign, Index, IndexMut};
 
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct Coor {
@@ -63,11 +63,26 @@ impl Grid {
     pub fn in_grid(&self, coor: Coor) -> bool {
         coor.x >= 0 && coor.x < self.width && coor.y >= 0 && coor.y < self.height
     }
+
+    pub fn copy_with(&self, value: u8) -> Self {
+        Grid {
+            width: self.width,
+            height: self.height,
+            value: vec![value; (self.height * self.width) as usize],
+        }
+    }
 }
 
 impl Index<Coor> for Grid {
     type Output = u8;
     fn index(&self, index: Coor) -> &Self::Output {
         &self.value[(index.y * self.width + index.x) as usize]
+    }
+}
+
+impl IndexMut<Coor> for Grid {
+    #[inline]
+    fn index_mut(&mut self, index: Coor) -> &mut Self::Output {
+        &mut self.value[(self.width * index.y + index.x) as usize]
     }
 }
