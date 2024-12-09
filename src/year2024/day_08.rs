@@ -1,6 +1,5 @@
-use std::collections::HashMap;
-
 use crate::utils::grid::*;
+use std::collections::HashMap;
 
 struct Node {
     grid: Grid,

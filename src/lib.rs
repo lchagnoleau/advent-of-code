@@ -8,6 +8,7 @@ pub mod utils {
 }
 
 pub mod year2024 {
+    pub mod day_07;
     pub mod day_08;
 }
 
