@@ -1,4 +1,4 @@
-use std::ops::{Index};
+use std::ops::Index;
 
 #[derive(PartialEq, Debug)]
 struct Rule {
@@ -71,7 +71,7 @@ fn check_line(line: &Vec<u32>, rules: &Rules) -> bool {
     for page in line {
         let before = rules.before(*page);
         let after = rules.after(*page);
-    
+
         for l in line {
             if page == l {
                 break;
@@ -105,13 +105,13 @@ fn part1(input: &str) -> u32 {
     let rules = Rules::parse(inputs[0]);
 
     let pages_line = inputs[1]
-    .lines()
-    .map(|x| {
-        x.split(',')
-            .map(|x| x.parse::<u32>().unwrap())
-            .collect::<Vec<u32>>()
-    })
-    .collect::<Vec<Vec<u32>>>();
+        .lines()
+        .map(|x| {
+            x.split(',')
+                .map(|x| x.parse::<u32>().unwrap())
+                .collect::<Vec<u32>>()
+        })
+        .collect::<Vec<Vec<u32>>>();
 
     for line in pages_line {
         if check_line(&line, &rules) {
@@ -122,7 +122,6 @@ fn part1(input: &str) -> u32 {
     correct_pages.iter().map(|x| get_middle_of_list(x)).sum()
 }
 
-
 #[aoc(day5, part2)]
 fn part2(input: &str) -> u32 {
     let mut bad_pages: Vec<Vec<u32>> = Vec::new();
@@ -131,13 +130,13 @@ fn part2(input: &str) -> u32 {
     let rules = Rules::parse(inputs[0]);
 
     let pages_line = inputs[1]
-    .lines()
-    .map(|x| {
-        x.split(',')
-            .map(|x| x.parse::<u32>().unwrap())
-            .collect::<Vec<u32>>()
-    })
-    .collect::<Vec<Vec<u32>>>();
+        .lines()
+        .map(|x| {
+            x.split(',')
+                .map(|x| x.parse::<u32>().unwrap())
+                .collect::<Vec<u32>>()
+        })
+        .collect::<Vec<Vec<u32>>>();
 
     for line in pages_line {
         if !check_line(&line, &rules) {
@@ -145,7 +144,10 @@ fn part2(input: &str) -> u32 {
         }
     }
 
-    bad_pages.iter().map(|x| get_middle_of_list(&sort(x, &rules))).sum()
+    bad_pages
+        .iter()
+        .map(|x| get_middle_of_list(&sort(x, &rules)))
+        .sum()
 }
 
 #[test]
@@ -184,9 +186,9 @@ fn test_example() {
 
 #[test]
 fn test_middle() {
-    let list = vec![1, 2 ,3, 4, 5];
+    let list = vec![1, 2, 3, 4, 5];
     assert_eq!(get_middle_of_list(&list), 3);
-    let list = vec![1, 2 ,3];
+    let list = vec![1, 2, 3];
     assert_eq!(get_middle_of_list(&list), 2);
 }
 
