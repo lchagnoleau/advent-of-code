@@ -12,25 +12,8 @@ env:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        year: [ '2024' ]
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions-rs/toolchain@v1
-      with:
-        toolchain: stable
-        components: rustfmt, clippy
-        override: true
-    - name: Run clippy
-      env:
-        YEAR: ${{ matrix.year }}
-      run: |
-        cd $YEAR
-        cargo clippy --all-targets --all-features -- -D warnings
-    - name: Run tests
-      env:
-        YEAR: ${{ matrix.year }}
-      run: |
-        cd $YEAR
-        cargo test
+    - uses: actions/checkout@v4
+    - run: cargo fmt --check
+    - run: cargo clippy --all-targets --all-features -- -D warnings
+    - run: cargo test
