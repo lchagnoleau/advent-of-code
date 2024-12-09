@@ -146,7 +146,7 @@ fn search(matrix: &Matrix, mut coor: Coor, dir: Coor, size: i32) -> u32 {
 }
 
 #[test]
-fn part1_input() {
+fn test_example() {
     let data = "MMMSXXMASM
 MSAMXMSMSA
 AMXSXMAAMM

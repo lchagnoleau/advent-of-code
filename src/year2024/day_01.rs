@@ -1,5 +1,3 @@
-use std::result;
-
 #[aoc(day1, part1)]
 fn part1(input: &str) -> u32 {
     let mut result: u32 = 0;
@@ -17,14 +15,14 @@ fn part1(input: &str) -> u32 {
 
     for i in 0..first_list.len() {
         let diff: i32 = first_list[i] as i32 - second_list[i] as i32;
-        result += diff.abs() as u32;
+        result += diff.unsigned_abs();
     }
 
     result
 }
 
 fn split_line(line: &str) -> (u32, u32) {
-    let first = line.split("   ").nth(0).unwrap().parse::<u32>().unwrap();
+    let first = line.split("   ").next().unwrap().parse::<u32>().unwrap();
     let second = line.split("   ").nth(1).unwrap().parse::<u32>().unwrap();
     (first, second)
 }
@@ -54,24 +52,20 @@ fn part2(input: &str) -> u32 {
     result
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[test]
+fn test_example() {
+    let data = "3   4
+4   3
+2   5
+1   3
+3   9
+3   3";
+    assert_eq!(part1(data), 11);
+    assert_eq!(part2(data), 31);
+}
 
-    #[test]
-    fn part1_input() {
-        let data = include_str!("../input/day1.txt");
-        assert_eq!(part1(data), 2285373);
-    }
-    #[test]
-    fn part2_input() {
-        let data = include_str!("../input/day1.txt");
-        assert_eq!(part2(data), 21142653);
-    }
-
-    #[test]
-    fn test_split_line() {
-        let data = split_line("33242   97663");
-        assert_eq!(data, (33242, 97663));
-    }
+#[test]
+fn test_split_line() {
+    let data = split_line("33242   97663");
+    assert_eq!(data, (33242, 97663));
 }
